@@ -1,0 +1,44 @@
+---
+description: 逆向分析工作流程與證據標準
+alwaysApply: true
+---
+
+# 工作流程（強制）
+- 先定義問題：要回答「它做了什麼」或「它怎麼驗證」或「為何會觸發」。
+- 先收證據再下結論：任何推論要指出依據（字串、CFG、syscall、maps、stack trace、binder 代碼、JNI RegisterNatives 等）。
+- 拆成三層觀測：
+  - Java/Kotlin：反射、ClassLoader、PackageManager、Integrity/installer source
+  - Native：ELF、linker、syscall、anti-tamper、text/rodata hash
+  - Kernel/Preload：Zygisk/KernelSU/susfs/kpm、/proc 視圖、syscall 攔截
+
+# 「可重現」要求
+- 任何實驗要提供：
+  - **App 版本**（必須，從 `config/VERSION_INFO.md` 獲取當前版本）
+  - 目標版本（ABI、Android version、kernel version）
+  - 操作步驟（高層次，不包含未授權繞過細節）
+  - 觀測點（log tag、函數名/offset、關鍵返回值、thread 名稱）
+
+# App 版本檢查（強制）
+- 開始分析前，必須確認當前分析的 App 版本
+- 版本信息來源：`config/VERSION_INFO.md`
+- 如發現版本不一致，必須先更新版本信息
+
+# 逆向命名規範（強制）
+- **函數命名**：動詞開頭，描述意圖 + 作用域
+  - ✅ 正確：`validateInstallerSource()`, `scanProcMapsForHooks()`, `verifyTextSegmentCrc()`
+  - ❌ 錯誤：`check()`, `scan()`, `verify()`
+- **變數命名**：資料型態 + 角色
+  - ✅ 正確：`mapsFd`, `textBase`, `crcExpected`, `jniEnv`, `regNativesTable`
+  - ❌ 錯誤：`fd`, `base`, `crc`, `env`, `table`
+- **事件處理器**：前綴 `handle`（如 `handleClick`, `handleKeyDown`）
+
+# 代碼質量原則（強制）
+- **簡潔性**：寫簡單直接的代碼，避免不必要的複雜度
+- **可讀性**：確保代碼易讀易懂，優先考慮可讀性而非過度優化
+- **最小變更**：只修改與任務相關的代碼部分，避免修改無關代碼
+- **錯誤處理**：實現穩健的錯誤處理和日誌記錄
+- **邊界情況**：考慮並處理潛在的邊界情況
+- **詳細規則**：請參考 `05_code_quality.mdc`
+
+# 問題分析與處理（強制）
+- **詳細流程與規則**：請參考 `15_problem_analysis.mdc`

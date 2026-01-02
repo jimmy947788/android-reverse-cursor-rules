@@ -1,0 +1,104 @@
+---
+description: Frida 執行環境配置與風控規避
+alwaysApply: false
+globs:
+  - "**/*.js"
+  - "**/frida-script/**"
+  - "**/frida-test/**"
+---
+
+# Frida 執行環境配置（強制）
+
+## 風控規避策略
+- **使用改過特徵的 Frida Gadget**：為避免風控檢測，必須使用特徵修改過的 Frida Gadget 執行
+- 不使用標準 Frida Server，改用 Gadget 模式
+- Gadget 已進行特徵修改，降低被檢測風險
+
+## 固定端口配置
+- **固定端口**：`14725`
+- 所有 Frida 連接必須使用此固定端口
+- 設備 IP 地址：`192.168.0.69`（根據實際環境調整）
+
+## 標準執行命令
+
+### 基本格式
+```bash
+uv run frida -H 192.168.0.69:14725 -l {腳本名稱}.js -F
+```
+
+### 命令參數說明
+- `uv run`：使用 uv 執行器運行命令，確保環境一致性
+- `-H 192.168.0.69:14725`：連接到指定 IP 和端口（固定端口 14725）
+- `-l {腳本名稱}.js`：載入指定的 Frida 腳本
+- `-F`：附加到前台應用（foreground app）
+
+### 執行範例
+```bash
+# 執行 okhttp_poker.js
+uv run frida -H 192.168.0.69:14725 -l okhttp_poker.js -F
+
+# 執行其他腳本
+uv run frida -H 192.168.0.69:14725 -l frida-script/trace_vtap.js -F
+```
+
+## Frida 版本要求（強制）
+
+### 必須使用的版本
+- **frida-tools**: `13.7.1`
+- **frida**: `16.7.19`
+
+### 版本檢查
+```bash
+# 檢查 frida-tools 版本
+uv run frida --version
+
+# 檢查 frida 版本
+python -c "import frida; print(frida.__version__)"
+```
+
+### 版本重要性
+- 必須使用指定版本，避免版本不兼容問題
+- 不同版本可能導致腳本執行失敗或行為異常
+- 版本不匹配可能觸發風控檢測
+
+## 環境準備檢查清單
+
+### 執行前檢查
+- [ ] 確認 Frida Gadget 已正確配置並運行在設備上
+- [ ] 確認網絡連接正常，可以訪問設備 IP
+- [ ] 確認端口 14725 未被占用
+- [ ] 確認 Frida 版本正確（frida-tools==13.7.1, frida==16.7.19）
+- [ ] 確認使用 `uv run` 執行命令
+
+### 連接測試
+```bash
+# 測試連接
+uv run frida -H 192.168.0.69:14725 -l test_connection.js -F
+```
+
+## 故障排除
+
+### 連接失敗
+- 檢查設備 IP 地址是否正確
+- 確認端口 14725 是否正確
+- 確認 Frida Gadget 是否正在運行
+- 檢查網絡連接
+
+### 版本不匹配
+- 確認 requirements.txt 中的版本
+- 重新安裝指定版本：
+  ```bash
+  pip install frida==16.7.19 frida-tools==13.7.1
+  ```
+
+### 腳本執行失敗
+- 檢查腳本路徑是否正確
+- 確認腳本語法無誤
+- 查看錯誤訊息和堆疊追蹤
+
+## 注意事項
+
+1. **固定端口**：所有連接必須使用端口 14725，不要隨意更改
+2. **使用 uv run**：必須使用 `uv run` 執行，確保環境一致性
+3. **Gadget 模式**：使用改過特徵的 Frida Gadget，不是標準 Frida Server
+4. **版本鎖定**：嚴格使用指定版本，避免版本問題

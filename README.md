@@ -1,1 +1,0 @@
-# android-reverse-cursor-rules

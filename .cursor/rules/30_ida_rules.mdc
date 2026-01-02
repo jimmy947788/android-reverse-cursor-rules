@@ -1,0 +1,23 @@
+---
+description: IDA Pro 反編譯輸出解讀與重命名建議
+globs:
+  - "**/*.c"
+  - "**/*.h"
+  - "**/*.i64"
+  - "**/ida/**"
+alwaysApply: false
+---
+
+# IDA 輸出解讀原則
+- 遇到 sub_xxxx：先以「功能假說」命名，再用交叉引用與字串驗證。
+- 重點變數優先重命名：
+  - a1/a2 -> ctx/obj/env 等語意化名稱
+  - vXX -> 明確角色（fd、len、base、crc、state、idx）
+- 對 JNI：
+  - 辨識 RegisterNatives 表
+  - 建議輸出：Java 類名、native 方法名、簽名、fn ptr
+
+# 反混淆流程
+- 先拆：字串解密/表驅動/VM dispatcher
+- 再抓：安全檢測入口點（maps、ptrace、sig、installer、integrity）
+- 最後整理：狀態機（state machine）與觸發條件
